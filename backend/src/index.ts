@@ -4,6 +4,7 @@ import swaggerUi from 'swagger-ui-express';
 import mongoose from 'mongoose';
 import userRoutes from './routes/userRoutes';
 import imageRoutes from './routes/imageRoutes';
+import { swaggerDocument } from './swagger';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,6 +19,9 @@ app.use(express.urlencoded({ extended: true }));
 mongoose.connect(MONGODB_URI)
     .then(() => console.log('Connected to MongoDB'))
     .catch((error) => console.error('MongoDB connection error:', error));
+
+// Swagger documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Routes
 app.use('/user', userRoutes);
