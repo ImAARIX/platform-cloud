@@ -2,6 +2,9 @@ import { Response } from 'express';
 import ImageModel from '../model/Image';
 import { AuthRequest } from '../middleware/auth';
 import UserModel from '../model/User';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 
 export const createImage = async (req: AuthRequest, res: Response) => {
     try {
@@ -53,9 +56,43 @@ export const createImage = async (req: AuthRequest, res: Response) => {
     }
 };
 
+// Configure multer for file upload
+const uploadDir = path.join(process.cwd(), 'uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, uploadDir);
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+export const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 10 * 1024 * 1024 // 10MB limit
+    },
+    fileFilter: (req, file, cb) => {
+        const allowedMimes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        if (allowedMimes.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error('Invalid file type. Only JPEG, PNG, GIF and WebP are allowed.'));
+        }
+    }
+});
+
 export const uploadImage = async (req: AuthRequest, res: Response) => {
     try {
+        // Get ID from params
         const imageId = parseInt(req.params.id);
+        
+        // Get userId from auth middleware (via headers)
         const userId = req.userId;
 
         if (!userId) {
@@ -65,24 +102,55 @@ export const uploadImage = async (req: AuthRequest, res: Response) => {
             });
         }
 
+        // Check if file was uploaded
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                result: 'No file uploaded'
+            });
+        }
+
         // Find image
         const image = await ImageModel.findOne({ id: imageId });
         if (!image) {
+            // Clean up uploaded file if image not found
+            fs.unlinkSync(req.file.path);
             return res.status(404).json({
                 success: false,
                 result: 'Image not found'
             });
         }
 
-        // Check ownership (if you have user_id stored)
-        // For now, we'll assume file upload handling is done elsewhere
-        // This endpoint would typically use multer or similar for file upload
+        // Check ownership
+        if (image.user_id !== userId) {
+            // Clean up uploaded file if not owner
+            fs.unlinkSync(req.file.path);
+            return res.status(403).json({
+                success: false,
+                result: 'Forbidden: You do not own this image'
+            });
+        }
+
+        // Update image with file information
+        image.filename = req.file.filename;
+        image.mime_type = req.file.mimetype;
+        image.shot_date = new Date();
+        await image.save();
 
         return res.status(200).json({
-            success: true
+            success: true,
+            content: {
+                id: image.id,
+                filename: image.filename,
+                mime_type: image.mime_type
+            }
         });
     } catch (error) {
         console.error('Upload image error:', error);
+        // Clean up file if there was an error
+        if (req.file && fs.existsSync(req.file.path)) {
+            fs.unlinkSync(req.file.path);
+        }
         return res.status(500).json({
             success: false,
             result: 'Server error during image upload'

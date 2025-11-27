@@ -9,7 +9,7 @@ import platSwagger from "./swagger/platformcloud.json" with { type: "json" };
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/platform-cloud';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://admin:password@localhost:27017/platform-cloud?authSource=admin';
 
 // Middleware
 app.use(cors());
