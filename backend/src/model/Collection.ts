@@ -7,3 +7,18 @@ export interface CollectionDocument extends Document {
     created_at: Date
     updated_at: Date
 }
+
+const CollectionSchema: Schema<CollectionDocument> = new Schema(
+    {
+        id: { type: Number, required: true, unique: true },
+        name: { type: String, required: true },
+        description: { type: String }
+    },
+    {
+        timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
+    }
+);
+
+const CollectionModel: Model<CollectionDocument> = mongoose.model<CollectionDocument>('Collection', CollectionSchema);
+
+export default CollectionModel;
