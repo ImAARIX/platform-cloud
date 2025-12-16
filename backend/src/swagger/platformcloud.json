@@ -30,37 +30,32 @@
           {
             "name": "body",
             "in": "body",
+            "description": "User registration payload",
             "schema": {
               "type": "object",
               "properties": {
                 "email": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "user@example.com"
                 },
                 "password": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "strongPassword"
                 },
                 "username": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "bob"
                 }
               }
             }
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
-          },
           "201": {
             "description": "Created"
           },
           "400": {
             "description": "Bad Request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
           },
           "500": {
             "description": "Internal Server Error"
@@ -79,14 +74,17 @@
           {
             "name": "body",
             "in": "body",
+            "description": "Login payload",
             "schema": {
               "type": "object",
               "properties": {
                 "email": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "user@example.com"
                 },
                 "password": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "strongPassword"
                 }
               }
             }
@@ -118,9 +116,6 @@
         ],
         "summary": "Create an image placeholder (metadata)",
         "description": "",
-        "consumes": [
-          "multipart/form-data"
-        ],
         "parameters": [
           {
             "name": "authorization",
@@ -130,20 +125,19 @@
           {
             "name": "body",
             "in": "body",
+            "description": "Image metadata to create",
             "schema": {
               "type": "object",
               "properties": {
                 "title": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "My photo title"
                 }
               }
             }
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
-          },
           "201": {
             "description": "Created"
           },
@@ -152,12 +146,6 @@
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "404": {
-            "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"
@@ -338,40 +326,25 @@
           {
             "name": "body",
             "in": "body",
+            "description": "Collection payload",
             "schema": {
               "type": "object",
               "properties": {
                 "name": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "My collection"
                 },
                 "description": {
-                  "example": "any"
-                },
-                "id": {
-                  "example": "any"
+                  "type": "string",
+                  "example": "Optional description"
                 }
               }
             }
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "201": {
-            "description": "Created"
-          },
-          "204": {
-            "description": "No Content"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
           "401": {
             "description": "Unauthorized"
-          },
-          "404": {
-            "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"
