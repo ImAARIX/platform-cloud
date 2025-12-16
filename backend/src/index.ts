@@ -29,16 +29,6 @@ app.use('/user', userRoutes);
 app.use('/image', imageRoutes);
 app.use('/collection', collectionRoutes);
 
-// Basic route
-app.get('/', (req: Request, res: Response) => {
-  res.json({ message: 'Welcome to Platform Cloud API' });
-});
-
-// Health check
-app.get('/health', (req: Request, res: Response) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
-
 // Start server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

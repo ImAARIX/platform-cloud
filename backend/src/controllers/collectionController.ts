@@ -68,7 +68,13 @@ export const getMyCollections = async (req: Request, res: Response) => {
 export const getCollectionById = async (req: Request<{ id: string }>, res: Response) => {
     // #swagger.tags = ['Collection']
     // #swagger.summary = 'Get a collection by its numeric ID'
-    // #swagger.parameters['id'] = { in: 'path', description: 'Collection id', required: true, type: 'integer', example: 1 }
+    // #swagger.parameters['id'] = { 
+    //      in: 'path', 
+    //      description: 'Collection id', 
+    //      required: true, 
+    //      type: 'integer', 
+    //      example: 1 
+    // }
 
     try {
         const numericId = Number(req.params.id);
