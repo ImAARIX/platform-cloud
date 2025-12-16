@@ -7,6 +7,14 @@ import path from 'path';
 import fs from 'fs';
 
 export const createImage = async (req: AuthRequest, res: Response) => {
+    // #swagger.tags = ['Image']
+    // #swagger.summary = 'Create an image placeholder (metadata)'
+    // #swagger.parameters['body'] = {
+    //   in: 'body',
+    //   description: 'Image metadata to create',
+    //   schema: { title: 'My photo title' }
+    // }
+
     try {
         const { title } = req.body;
         const userId = req.userId;
@@ -88,6 +96,12 @@ export const upload = multer({
 });
 
 export const uploadImage = async (req: AuthRequest, res: Response) => {
+    // #swagger.tags = ['Image']
+    // #swagger.summary = 'Upload binary file for an image ID (multipart)'
+    // #swagger.consumes = ['multipart/form-data']
+    // #swagger.parameters['id'] = { in: 'path', description: 'Image id', required: true, type: 'integer', example: 1 }
+    // #swagger.parameters['file'] = { in: 'formData', type: 'file', description: 'Image file to upload' }
+
     try {
         // Get ID from params
         const imageId = parseInt(req.params.id);
@@ -159,6 +173,9 @@ export const uploadImage = async (req: AuthRequest, res: Response) => {
 };
 
 export const getMyImages = async (req: AuthRequest, res: Response) => {
+    // #swagger.tags = ['Image']
+    // #swagger.summary = 'Get images for the authenticated user'
+
     try {
         const userId = req.userId;
 
@@ -193,6 +210,10 @@ export const getMyImages = async (req: AuthRequest, res: Response) => {
 };
 
 export const getImageById = async (req: AuthRequest, res: Response) => {
+    // #swagger.tags = ['Image']
+    // #swagger.summary = 'Get image details by ID'
+    // #swagger.parameters['id'] = { in: 'path', description: 'Image id', required: true, type: 'integer', example: 1 }
+
     try {
         const imageId = parseInt(req.params.id);
 

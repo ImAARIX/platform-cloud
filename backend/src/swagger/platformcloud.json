@@ -41,6 +41,10 @@
     },
     "/user/register": {
       "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Register a new user",
         "description": "",
         "parameters": [
           {
@@ -63,11 +67,20 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK"
+          },
           "201": {
             "description": "Created"
           },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           },
           "500": {
             "description": "Internal Server Error"
@@ -77,6 +90,10 @@
     },
     "/user/login": {
       "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Authenticate user and return JWT",
         "description": "",
         "parameters": [
           {
@@ -116,7 +133,14 @@
     },
     "/image/create": {
       "post": {
+        "tags": [
+          "Image"
+        ],
+        "summary": "Create an image placeholder (metadata)",
         "description": "",
+        "consumes": [
+          "multipart/form-data"
+        ],
         "parameters": [
           {
             "name": "authorization",
@@ -137,6 +161,9 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK"
+          },
           "201": {
             "description": "Created"
           },
@@ -146,6 +173,12 @@
           "401": {
             "description": "Unauthorized"
           },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
           "500": {
             "description": "Internal Server Error"
           }
@@ -154,18 +187,33 @@
     },
     "/image/{id}/upload": {
       "post": {
+        "tags": [
+          "Image"
+        ],
+        "summary": "Upload binary file for an image ID (multipart)",
         "description": "",
+        "consumes": [
+          "multipart/form-data"
+        ],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "integer",
+            "description": "Image id",
+            "example": 1
           },
           {
             "name": "authorization",
             "in": "header",
             "type": "string"
+          },
+          {
+            "name": "file",
+            "in": "formData",
+            "type": "file",
+            "description": "Image file to upload"
           }
         ],
         "responses": {
@@ -192,6 +240,10 @@
     },
     "/image/me": {
       "get": {
+        "tags": [
+          "Image"
+        ],
+        "summary": "Get images for the authenticated user",
         "description": "",
         "parameters": [
           {
@@ -215,13 +267,19 @@
     },
     "/image/{id}": {
       "get": {
+        "tags": [
+          "Image"
+        ],
+        "summary": "Get image details by ID",
         "description": "",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "integer",
+            "description": "Image id",
+            "example": 1
           },
           {
             "name": "authorization",
@@ -247,6 +305,10 @@
     },
     "/collection/": {
       "post": {
+        "tags": [
+          "Collection"
+        ],
+        "summary": "Create a new collection",
         "description": "",
         "parameters": [
           {
@@ -260,13 +322,13 @@
             "schema": {
               "type": "object",
               "properties": {
-                "id": {
-                  "example": "any"
-                },
                 "name": {
                   "example": "any"
                 },
                 "description": {
+                  "example": "any"
+                },
+                "id": {
                   "example": "any"
                 }
               }
@@ -274,8 +336,23 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "Created"
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
           "401": {
             "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"
@@ -283,6 +360,10 @@
         }
       },
       "get": {
+        "tags": [
+          "Collection"
+        ],
+        "summary": "List collections visible to the caller",
         "description": "",
         "parameters": [
           {

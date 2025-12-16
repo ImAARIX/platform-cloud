@@ -7,6 +7,14 @@ export const register = async (req: AuthRequest, res: Response) => {
     try {
         const { email, password, username } = req.body;
 
+        // #swagger.tags = ['User']
+        // #swagger.summary = 'Register a new user'
+        // #swagger.parameters['body'] = {
+        //   in: 'body',
+        //   description: 'User registration payload',
+        //   schema: { email: 'user@example.com', password: 'strongPassword', username: 'bob' }
+        // }
+
         // Validation
         if (!email || !password || !username) {
             return res.status(400).json({
@@ -58,6 +66,14 @@ export const register = async (req: AuthRequest, res: Response) => {
 export const login = async (req: AuthRequest, res: Response) => {
     try {
         const { email, password } = req.body;
+
+        // #swagger.tags = ['User']
+        // #swagger.summary = 'Authenticate user and return JWT'
+        // #swagger.parameters['body'] = {
+        //   in: 'body',
+        //   description: 'Login payload',
+        //   schema: { email: 'user@example.com', password: 'strongPassword' }
+        // }
 
         // Validation
         if (!email || !password) {
