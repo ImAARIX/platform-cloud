@@ -33,11 +33,7 @@ export const createCollection = async (req: Request, res: Response) => {
             return res.status(400).json({ message: 'Name is required' });
         }
 
-        const last = await CollectionModel.findOne().sort({ id: -1 }).lean();
-        let collectionId = last ? last.id + 1 : 1;
-
         const collection = await CollectionModel.create({
-            id: collectionId,
             color: color,
             name,
             description,
