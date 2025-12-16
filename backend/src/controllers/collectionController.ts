@@ -14,7 +14,7 @@ interface UpdateCollectionBody {
 }
 
 // Créer une collection
-export const createCollection = async (req: Request<unknown, unknown, CreateCollectionBody>, res: Response) => {
+export const createCollection = async (req: Request, res: Response) => {
     /*
         #swagger.tags = ['Collection']
         #swagger.summary = 'Create a new collection'
@@ -69,7 +69,7 @@ export const getMyCollections = async (req: Request, res: Response) => {
 };
 
 // Récupérer une collection par id
-export const getCollectionById = async (req: Request<{ id: string }>, res: Response) => {
+export const getCollectionById = async (req: Request, res: Response) => {
     /*
         #swagger.tags = ['Collection']
         #swagger.summary = 'Get a collection by its numeric ID'
@@ -102,27 +102,23 @@ export const getCollectionById = async (req: Request<{ id: string }>, res: Respo
 
 // Mettre à jour une collection
 export const updateCollection = async (
-    req: Request<{ id: string }, unknown, UpdateCollectionBody>,
+    req: Request,
     res: Response
 ) => {
-    /* 
+    /*
         #swagger.tags = ['Collection']
         #swagger.summary = 'Update a collection by ID'
         #swagger.parameters['id'] = {
-                in: 'path',
-                description: 'Collection id',
-                required: true,
-                type: 'integer',
-                example: 1
-        } 
+            in: 'path',
+            description: 'Collection id',
+            required: true,
+            type: 'integer',
+            example: 1
+        }
         #swagger.parameters['body'] = {
             in: 'body',
-            description: 'Collection update payload',
-            required: true,
-            schema: {
-                 name: 'Updated name',
-                 description: 'Updated description'
-            }
+            description: 'Collection payload',
+            schema: { name: 'My collection', description: 'Optional description' }
         }
     */
     try {
@@ -153,7 +149,7 @@ export const updateCollection = async (
 };
 
 // Supprimer une collection
-export const deleteCollection = async (req: Request<{ id: string }>, res: Response) => {
+export const deleteCollection = async (req: Request, res: Response) => {
     /*
         #swagger.tags = ['Collection']
         #swagger.summary = 'Delete a collection by ID'
