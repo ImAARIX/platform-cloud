@@ -11,6 +11,7 @@ interface CreateCollectionBody {
 interface UpdateCollectionBody {
     name?: string;
     description?: string;
+    color?: string;
 }
 
 // Créer une collection
@@ -21,26 +22,23 @@ export const createCollection = async (req: Request, res: Response) => {
         #swagger.parameters['body'] = {
             in: 'body',
             description: 'Collection payload',
-            schema: { name: 'My collection', description: 'Optional description' }
+            schema: { name: 'My collection', description: 'Optional description', color: 'Color in hex' }
         }
     */
 
     try {
-        const { id, name, description } = req.body;
+        const { name, description, color } = req.body;
 
         if (!name) {
             return res.status(400).json({ message: 'Name is required' });
         }
 
-        let collectionId = id;
-        // Exemple d’auto-incrément très simple (à remplacer par un vrai compteur si besoin)
-        if (!collectionId) {
-            const last = await CollectionModel.findOne().sort({ id: -1 }).lean();
-            collectionId = last ? last.id + 1 : 1;
-        }
+        const last = await CollectionModel.findOne().sort({ id: -1 }).lean();
+        let collectionId = last ? last.id + 1 : 1;
 
         const collection = await CollectionModel.create({
             id: collectionId,
+            color: color,
             name,
             description,
         });
@@ -118,7 +116,7 @@ export const updateCollection = async (
         #swagger.parameters['body'] = {
             in: 'body',
             description: 'Collection payload',
-            schema: { name: 'My collection', description: 'Optional description' }
+            schema: { name: 'My collection', description: 'Optional description', color: 'Color in hex' }
         }
     */
     try {
@@ -130,6 +128,7 @@ export const updateCollection = async (
         const updatePayload: UpdateCollectionBody = {};
         if (typeof req.body.name === 'string') updatePayload.name = req.body.name;
         if (typeof req.body.description === 'string') updatePayload.description = req.body.description;
+        if (typeof req.body.color === 'string') updatePayload.color = req.body.color;
 
         const updated = await CollectionModel.findOneAndUpdate(
             { id: numericId },

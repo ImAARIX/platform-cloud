@@ -4,6 +4,7 @@ export interface CollectionDocument extends Document {
     id: number
     name: string
     description?: string
+    color?: string
     created_at: Date
     updated_at: Date
 }
@@ -12,7 +13,8 @@ const CollectionSchema: Schema<CollectionDocument> = new Schema(
     {
         id: { type: Number, required: true, unique: true },
         name: { type: String, required: true },
-        description: { type: String }
+        description: { type: String },
+        color: { type: String }
     },
     {
         timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
