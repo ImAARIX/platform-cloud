@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { Types } from 'mongoose';
 import AlbumModel from '../model/Album';
 import { AuthRequest } from '../middleware/auth';
 import ImageModel from '../model/Image';
@@ -80,7 +81,7 @@ export const getMyAlbums = async (req: AuthRequest, res: Response) => {
         
     try {
         const albums = await AlbumModel.find({user: req.user._id}).sort({ created_at: -1 }).lean();
-        const result = await Promise.all(albums.map(async (album: AlbumDocument) => ({
+        const result = await Promise.all(albums.map(async (album: any) => ({
             id: album._id,
             name: album.name,
             description: album.description,
@@ -116,7 +117,7 @@ export const getAlbumById = async (req: AuthRequest, res: Response) => {
         }
         
         const { id } = req.params;
-        if (Number.isNaN(id)) {
+        if (!Types.ObjectId.isValid(id)) {
             return res.status(400).json({ message: 'Invalid album id' });
         }
 
@@ -172,7 +173,7 @@ export const updateAlbum = async (
         }
         
         const { id } = req.params;
-        if (Number.isNaN(id)) {
+        if (!Types.ObjectId.isValid(id)) {
             return res.status(400).json({ message: 'Invalid album id' });
         }
 
@@ -214,7 +215,7 @@ export const deleteAlbum = async (req: AuthRequest, res: Response) => {
             return res.status(401).json({ message: 'Unauthorized' });
         }
 
-        if (Number.isNaN(id)) {
+        if (!Types.ObjectId.isValid(id)) {
             return res.status(400).json({ message: 'Invalid album id' });
         }
 
