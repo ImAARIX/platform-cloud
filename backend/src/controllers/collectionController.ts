@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import CollectionModel from '../model/Collection';
 import { AuthRequest } from '../middleware/auth';
+import ImageModel from '../model/Image';
 
 // Typed payloads pour plus de clarté
 interface CreateCollectionBody {
@@ -46,7 +47,14 @@ export const createCollection = async (req: AuthRequest, res: Response) => {
             user: user
         });
 
-        return res.status(201).json(collection);
+        return res.status(201).json({
+            id: collection._id,
+            name: collection.name,
+            description: collection.description,
+            color: collection.color,
+            created_at: collection.created_at,
+            images: ImageModel.find({ collection: collection._id }).lean()
+        });
     } catch (error) {
         console.error('Error creating collection', error);
         return res.status(500).json({ message: 'Internal server error' });
@@ -102,7 +110,13 @@ export const getCollectionById = async (req: AuthRequest, res: Response) => {
             return res.status(404).json({ message: 'Collection not found' });
         }
 
-        return res.status(200).json(collection);
+        return res.status(200).json({
+            id: collection._id,
+            name: collection.name,
+            description: collection.description,
+            color: collection.color,
+            created_at: collection.created_at,
+        });
     } catch (error) {
         console.error('Error fetching collection', error);
         return res.status(500).json({ message: 'Internal server error' });
