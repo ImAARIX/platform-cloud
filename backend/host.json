@@ -16,5 +16,10 @@
       "Host.Aggregator": "Information",
       "Function": "Information"
     }
+  },
+  "extensions": {
+    "http": {
+      "routePrefix": "api"
+    }
   }
 }

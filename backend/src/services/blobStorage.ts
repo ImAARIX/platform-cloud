@@ -4,7 +4,7 @@
  */
 
 import { ContainerClient } from '@azure/storage-blob';
-import { initBlobServiceClient, getBlobContainerName } from '../config/azure';
+import { initBlobServiceClient, getBlobContainerName } from '../config/azure.js';
 import { Readable } from 'stream';
 
 let containerClient: ContainerClient | null = null;
