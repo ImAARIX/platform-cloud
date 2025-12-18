@@ -14,7 +14,7 @@
     "bearerAuth": {
       "type": "apiKey",
       "in": "header",
-      "name": "Authorization",
+      "name": "authorization",
       "description": "Utilisez le format: Bearer {votre_token_JWT}"
     }
   },
@@ -109,6 +109,58 @@
         }
       }
     },
+    "/user/logout": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Logout user by clearing the authentication cookie",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/user/me": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Get current authenticated user details",
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "cookie",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/image/create": {
       "post": {
         "tags": [
@@ -119,6 +171,11 @@
         "parameters": [
           {
             "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "cookie",
             "in": "header",
             "type": "string"
           },
@@ -168,12 +225,17 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "integer",
+            "type": "text",
             "description": "Image id",
             "example": 1
           },
           {
             "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "cookie",
             "in": "header",
             "type": "string"
           },
@@ -218,6 +280,11 @@
             "name": "authorization",
             "in": "header",
             "type": "string"
+          },
+          {
+            "name": "cookie",
+            "in": "header",
+            "type": "string"
           }
         ],
         "responses": {
@@ -245,12 +312,17 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "integer",
+            "type": "string",
             "description": "Image id",
-            "example": 1
+            "example": "1"
           },
           {
             "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "cookie",
             "in": "header",
             "type": "string"
           }
@@ -281,12 +353,17 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "integer",
+            "type": "string",
             "description": "Image id",
-            "example": 1
+            "example": "1"
           },
           {
             "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "cookie",
             "in": "header",
             "type": "string"
           }
@@ -324,6 +401,11 @@
             "type": "string"
           },
           {
+            "name": "cookie",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "body",
             "in": "body",
             "description": "Collection payload",
@@ -337,6 +419,10 @@
                 "description": {
                   "type": "string",
                   "example": "Optional description"
+                },
+                "color": {
+                  "type": "string",
+                  "example": "Color in hex"
                 }
               }
             }
@@ -366,6 +452,11 @@
         "parameters": [
           {
             "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "cookie",
             "in": "header",
             "type": "string"
           }
@@ -401,6 +492,11 @@
           },
           {
             "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "cookie",
             "in": "header",
             "type": "string"
           }
@@ -444,6 +540,11 @@
             "type": "string"
           },
           {
+            "name": "cookie",
+            "in": "header",
+            "type": "string"
+          },
+          {
             "name": "body",
             "in": "body",
             "description": "Collection payload",
@@ -457,6 +558,10 @@
                 "description": {
                   "type": "string",
                   "example": "Optional description"
+                },
+                "color": {
+                  "type": "string",
+                  "example": "Color in hex"
                 }
               }
             }
@@ -497,6 +602,11 @@
           },
           {
             "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "cookie",
             "in": "header",
             "type": "string"
           }

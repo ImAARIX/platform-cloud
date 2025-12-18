@@ -1,7 +1,6 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface UserDocument extends Document {
-    id: number;
     username: string;
     email: string;
     hashed_password: string;
@@ -11,7 +10,6 @@ export interface UserDocument extends Document {
 
 const UserSchema: Schema<UserDocument> = new Schema(
     {
-        id: { type: Number, required: true, unique: true },
         username: { type: String, required: true },
         email: { type: String, required: true, unique: true },
         hashed_password: { type: String, required: true },

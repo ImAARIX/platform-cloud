@@ -8,9 +8,8 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "dev": "nodemon --exec tsx src/index.ts",
+    "dev": "nodemon -i swagger.json --exec tsx src/index.ts",
     "start": "node dist/index.js",
-    "swagger": "tsx swagger.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
@@ -21,6 +20,7 @@
     "@azure/storage-blob": "^12.29.1",
     "argon2": "^0.43.1",
     "axios": "^1.12.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",

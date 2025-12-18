@@ -35,13 +35,8 @@ export const register = async (req: AuthRequest, res: Response) => {
         // Hash password
         const hashed_password = await argon2.hash(password);
 
-        // Generate unique ID
-        const lastUser = await UserModel.findOne().sort({ id: -1 });
-        const newId = lastUser ? lastUser.id + 1 : 1;
-
         // Create user
         const user = new UserModel({
-            id: newId,
             username,
             email,
             hashed_password,
@@ -112,10 +107,32 @@ export const login = async (req: AuthRequest, res: Response) => {
         // Generate token
         const token = generateToken(user.id);
 
+        // Store the token in a cookie. To allow the cookie to be sent from
+        // `http://localhost:3000` and `http://localhost:5173` (different ports),
+        // the cookie must be cross-site enabled: `sameSite: 'none'` and `secure: true`.
+        // Set `domain: 'localhost'` so it's available across localhost ports.
+        // Keep `httpOnly: true` so JavaScript cannot read the cookie; change to
+        // `false` only if you need client-side access.
+        const cookieOptions = {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none',
+            domain: 'localhost',
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        } as const;
+
+        res.cookie('token', token, cookieOptions);
+
+        // Return user data (omit sensitive fields)
         return res.status(200).json({
             success: true,
-            result: "bravo t'es connecté !!!",
-            token
+            result: 'Authenticated',
+            user: {
+                id: user._id,
+                username: user.username,
+                email: user.email,
+                isActive: user.isActive
+            }
         });
     } catch (error) {
         console.error('Login error:', error);
@@ -123,5 +140,60 @@ export const login = async (req: AuthRequest, res: Response) => {
             success: false,
             result: 'Server error during login'
         });
+    }
+};
+
+export const logout = async (req: AuthRequest, res: Response) => {
+    /*
+        #swagger.tags = ['User']
+        #swagger.summary = 'Logout user by clearing the authentication cookie'
+     */
+    try {
+        // Clear cookie using same attributes used when setting it so the
+        // browser properly removes it.
+        const clearOptions = {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none',
+            domain: 'localhost'
+        } as const;
+
+        res.clearCookie('token', clearOptions);
+
+        return res.status(200).json({ success: true, result: 'Logged out' });
+    } catch (error) {
+        console.error('Logout error:', error);
+        return res.status(500).json({ success: false, result: 'Server error during logout' });
+    }
+};
+
+export const me = async (req: AuthRequest, res: Response) => {
+    /*
+        #swagger.tags = ['User']
+        #swagger.summary = 'Get current authenticated user details'
+     */
+    try {
+        const { user: userId } = req;
+        if (!userId) {
+            return res.status(401).json({ success: false, result: 'Unauthorized' });
+        }
+
+        const user = await UserModel.findOne({ _id: userId });
+        if (!user) {
+            return res.status(404).json({ success: false, result: 'User not found' });
+        }
+
+        return res.status(200).json({
+            success: true,
+            user: {
+                id: user._id,
+                username: user.username,
+                email: user.email,
+                isActive: user.isActive
+            }
+        });
+    } catch (error) {
+        console.error('Me error:', error);
+        return res.status(500).json({ success: false, result: 'Server error' });
     }
 };
