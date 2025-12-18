@@ -1,25 +1,23 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import UserModel, { UserDocument } from '../model/User';
+import { Types } from 'mongoose';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
 export interface AuthRequest extends Request {
-    userId?: number;
+    user?: UserDocument;
 }
 
-export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
+export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
         const authHeader = req.headers.authorization;
 
         // Accept token from Authorization header (Bearer), cookie `token`, or raw Cookie header
         let token: string | undefined;
 
-        if (authHeader && authHeader.toLowerCase().startsWith('bearer ')) {
-            token = authHeader.substring(7);
-        } else if (req.cookies && req.cookies.token) {
-            token = req.cookies.token;
-        } else if (req.headers.cookie) {
-            // Fallback: parse raw Cookie header (simple parser)
+        if (req.headers.cookie) {
+            // parse raw Cookie header (simple parser)
             const cookies = req.headers.cookie.split(';').map(c => c.trim()).reduce((acc: Record<string,string>, cur) => {
                 const eq = cur.indexOf('=');
                 if (eq === -1) return acc;
@@ -36,8 +34,14 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
         }
 
         try {
-            const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
-            req.userId = decoded.userId;
+            const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
+
+            const user = await UserModel.findOne({ _id: decoded.userId }).exec();
+            if (!user) {
+                return res.status(401).json({ success: false, result: 'Unauthorized: User not found' });
+            }
+
+            req.user = user;
             next();
         } catch (error) {
             return res.status(401).json({ success: false, result: 'Unauthorized: Invalid token' });
@@ -47,6 +51,6 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
     }
 };
 
-export const generateToken = (userId: number): string => {
-    return jwt.sign({ userId }, JWT_SECRET, { expiresIn: '7d' });
+export const generateToken = (userId: string | Types.ObjectId): string => {
+    return jwt.sign({ userId: userId.toString() }, JWT_SECRET, { expiresIn: '7d' });
 };

@@ -7,7 +7,7 @@ export interface ImageDocument extends Document {
     mime_type: string;
     created_at: Date;
     shot_date: Date;
-    user_id: number;
+    user: mongoose.Types.ObjectId;
 }
 
 const ImageSchema: Schema<ImageDocument> = new Schema(
@@ -17,7 +17,7 @@ const ImageSchema: Schema<ImageDocument> = new Schema(
         description: { type: String },
         mime_type: { type: String, required: true },
         shot_date: { type: Date, required: true },
-        user_id: { type: Number, required: true }
+        user: { type: Schema.Types.ObjectId, ref: 'User',  required: true }
     },
     {
         timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }

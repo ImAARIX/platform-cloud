@@ -162,12 +162,12 @@ export const me = async (req: AuthRequest, res: Response) => {
         #swagger.summary = 'Get current authenticated user details'
      */
     try {
-        const userId = req.userId;
+        const { user: userId } = req;
         if (!userId) {
             return res.status(401).json({ success: false, result: 'Unauthorized' });
         }
 
-        const user = await UserModel.findOne({ id: userId });
+        const user = await UserModel.findOne({ _id: userId });
         if (!user) {
             return res.status(404).json({ success: false, result: 'User not found' });
         }
