@@ -225,7 +225,7 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "integer",
+            "type": "text",
             "description": "Image id",
             "example": 1
           },
@@ -312,9 +312,9 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "integer",
+            "type": "string",
             "description": "Image id",
-            "example": 1
+            "example": "1"
           },
           {
             "name": "authorization",
@@ -353,9 +353,9 @@
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "integer",
+            "type": "string",
             "description": "Image id",
-            "example": 1
+            "example": "1"
           },
           {
             "name": "authorization",

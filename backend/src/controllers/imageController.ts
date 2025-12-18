@@ -40,7 +40,7 @@ export const createImage = async (req: AuthRequest, res: Response) => {
             title: title,
             mime_type: 'image/png', // Default, will be updated on upload
             shot_date: new Date(),
-            user_id: user._id // Store the owner
+            user: user._id // Store the owner
         });
 
         await image.save();
@@ -96,7 +96,7 @@ export const uploadImage = async (req: AuthRequest, res: Response) => {
         #swagger.tags = ['Image']
         #swagger.summary = 'Upload binary file for an image ID (multipart)'
         #swagger.consumes = ['multipart/form-data']
-        #swagger.parameters['id'] = { in: 'path', description: 'Image id', required: true, type: 'integer', example: 1 }
+        #swagger.parameters['id'] = { in: 'path', description: 'Image id', required: true, type: 'text', example: 1 }
         #swagger.parameters['file'] = { in: 'formData', type: 'file', description: 'Image file to upload' }
      */
 
@@ -105,7 +105,7 @@ export const uploadImage = async (req: AuthRequest, res: Response) => {
         const {id} = req.params;
         
         // Get userId from auth middleware (via headers)
-        const {user} = req;
+        const { user } = req;
 
         if (!user) {
             return res.status(401).json({
@@ -123,7 +123,7 @@ export const uploadImage = async (req: AuthRequest, res: Response) => {
         }
 
         // Find image
-        const image = await ImageModel.findOne({ _id: id });
+        const image = await ImageModel.findOne({ _id: id }).populate('user');
         if (!image) {
             // Clean up uploaded file if image not found
             fs.unlinkSync(req.file.path);
@@ -134,7 +134,8 @@ export const uploadImage = async (req: AuthRequest, res: Response) => {
         }
 
         // Check ownership
-        if (image.user !== user._id) {
+        console.log(image.user._id, user._id);
+        if (String(image.user._id) !== String(user._id)) {
             // Clean up uploaded file if not owner
             fs.unlinkSync(req.file.path);
             return res.status(403).json({
@@ -213,7 +214,7 @@ export const getImageById = async (req: AuthRequest, res: Response) => {
     /*
         #swagger.tags = ['Image']
         #swagger.summary = 'Get image details by ID'
-        #swagger.parameters['id'] = { in: 'path', description: 'Image id', required: true, type: 'integer', example: 1 }
+        #swagger.parameters['id'] = { in: 'path', description: 'Image id', required: true, type: 'string', example: '1' }
      */
 
     try {
@@ -261,7 +262,7 @@ export const deleteImage = async (req: AuthRequest, res: Response) => {
     /*
         #swagger.tags = ['Image']
         #swagger.summary = 'Delete an image by ID'
-        #swagger.parameters['id'] = { in: 'path', description: 'Image id', required: true, type: 'integer', example: 1 }
+        #swagger.parameters['id'] = { in: 'path', description: 'Image id', required: true, type: 'string', example: '1' }
      */
 
     try {
