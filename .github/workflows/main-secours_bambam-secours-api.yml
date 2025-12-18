@@ -51,6 +51,7 @@ jobs:
         with:
           app-name: 'bambam-secours-api'
           slot-name: 'Production'
-          package: backend
+          package: .
 
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_1AA2595E144B4C479FD09FEA529586D0 }}
+
