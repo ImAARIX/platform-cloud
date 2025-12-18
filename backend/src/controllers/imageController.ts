@@ -4,6 +4,8 @@ import { AuthRequest } from '../middleware/auth';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import { uploadBlob, deleteBlob, getBlobUrl, generateBlobName } from '../services/blobStorage';
+import { AzureBlobFile } from '../middleware/multerAzure';
 
 export const createImage = async (req: AuthRequest, res: Response) => {
     /*
@@ -81,6 +83,7 @@ const storage = multer.diskStorage({
     }
 });
 
+// Local storage upload (fallback)
 export const upload = multer({
     storage: storage,
     limits: {
@@ -95,6 +98,9 @@ export const upload = multer({
         }
     }
 });
+
+// Re-export Azure Blob Storage upload middleware
+export { azureBlobUpload } from '../middleware/multerAzure';
 
 export const uploadImage = async (req: AuthRequest, res: Response) => {
     /*
@@ -130,8 +136,10 @@ export const uploadImage = async (req: AuthRequest, res: Response) => {
         // Find image
         const image = await ImageModel.findOne({ id: imageId });
         if (!image) {
-            // Clean up uploaded file if image not found
-            fs.unlinkSync(req.file.path);
+            // Clean up uploaded file if image not found (local storage only)
+            if (req.file.path && fs.existsSync(req.file.path)) {
+                fs.unlinkSync(req.file.path);
+            }
             return res.status(404).json({
                 success: false,
                 result: 'Image not found'
@@ -140,15 +148,39 @@ export const uploadImage = async (req: AuthRequest, res: Response) => {
 
         // Check ownership
         if (image.user_id !== userId) {
-            // Clean up uploaded file if not owner
-            fs.unlinkSync(req.file.path);
+            // Clean up uploaded file if not owner (local storage only)
+            if (req.file.path && fs.existsSync(req.file.path)) {
+                fs.unlinkSync(req.file.path);
+            }
             return res.status(403).json({
                 success: false,
                 result: 'Forbidden: You do not own this image'
             });
         }
 
-        // Update image with file information
+        // Check if uploaded via Azure Blob Storage (custom storage engine)
+        const azureFile = req.file as AzureBlobFile;
+        if (azureFile.blobName && azureFile.blobUrl) {
+            // Azure Blob Storage upload
+            image.filename = azureFile.originalname;
+            image.mime_type = azureFile.mimetype;
+            image.blob_name = azureFile.blobName;
+            image.blob_url = azureFile.blobUrl;
+            image.shot_date = new Date();
+            await image.save();
+
+            return res.status(200).json({
+                success: true,
+                content: {
+                    id: image.id,
+                    filename: image.filename,
+                    mime_type: image.mime_type,
+                    url: image.blob_url
+                }
+            });
+        }
+
+        // Fallback: Local storage upload (disk storage)
         image.filename = req.file.filename;
         image.mime_type = req.file.mimetype;
         image.shot_date = new Date();
@@ -164,8 +196,8 @@ export const uploadImage = async (req: AuthRequest, res: Response) => {
         });
     } catch (error) {
         console.error('Upload image error:', error);
-        // Clean up file if there was an error
-        if (req.file && fs.existsSync(req.file.path)) {
+        // Clean up file if there was an error (local storage)
+        if (req.file && req.file.path && fs.existsSync(req.file.path)) {
             fs.unlinkSync(req.file.path);
         }
         return res.status(500).json({
@@ -196,12 +228,13 @@ export const getMyImages = async (req: AuthRequest, res: Response) => {
 
         const formattedImages = images.map(img => ({
             id: img.id,
-            url: `http://localhost:3000/uploads/${img.filename}`,
+            url: img.blob_url || `http://localhost:3000/uploads/${img.filename}`,
             title: img.title,
             description: img.description,
             mime_type: img.mime_type,
             created_at: img.created_at,
-            shot_date: img.shot_date
+            shot_date: img.shot_date,
+            storage_type: img.blob_url ? 'azure' : 'local'
         }));
 
         return res.status(200).json(formattedImages);
@@ -236,12 +269,13 @@ export const getImageById = async (req: AuthRequest, res: Response) => {
             success: true,
             content: {
                 id: image.id,
-                url: `http://localhost:3000/uploads/${image.filename}`,
+                url: image.blob_url || `http://localhost:3000/uploads/${image.filename}`,
                 title: image.title,
                 description: image.description,
                 mime_type: image.mime_type,
                 created_at: image.created_at,
-                shot_date: image.shot_date
+                shot_date: image.shot_date,
+                storage_type: image.blob_url ? 'azure' : 'local'
             }
         });
     } catch (error) {
@@ -287,10 +321,22 @@ export const deleteImage = async (req: AuthRequest, res: Response) => {
             });
         }
 
-        // Delete image file
-        const filePath = path.join(uploadDir, image.filename);
-        if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
+        // Delete image file from appropriate storage
+        if (image.blob_name) {
+            // Delete from Azure Blob Storage
+            try {
+                await deleteBlob(image.blob_name);
+                console.log(`Blob '${image.blob_name}' deleted from Azure`);
+            } catch (error) {
+                console.error('Error deleting blob from Azure:', error);
+                // Continue with deletion even if blob deletion fails
+            }
+        } else {
+            // Delete from local storage
+            const filePath = path.join(uploadDir, image.filename);
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
         }
 
         // Delete image document
