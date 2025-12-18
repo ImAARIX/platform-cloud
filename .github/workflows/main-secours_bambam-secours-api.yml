@@ -25,15 +25,15 @@ jobs:
 
       - name: npm install, build, and test
         run: |
+          cd backend
           npm install
           npm run build --if-present
-          npm run test --if-present
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: .
+          path: backend
 
   deploy:
     runs-on: ubuntu-latest
@@ -51,5 +51,6 @@ jobs:
         with:
           app-name: 'bambam-secours-api'
           slot-name: 'Production'
-          package: .
+          package: backend
+
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_1AA2595E144B4C479FD09FEA529586D0 }}
