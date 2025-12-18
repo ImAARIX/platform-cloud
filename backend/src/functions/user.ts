@@ -52,8 +52,17 @@ async function register(request: HttpRequest, context: InvocationContext): Promi
             });
         }
 
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return withCors({
+                status: 400,
+                jsonBody: { success: false, result: 'Invalid email format' }
+            });
+        }
+
         // Check if user already exists
-        const existingUser = await UserModel.findOne({ email });
+        const existingUser = await UserModel.findOne({ email: email.toLowerCase().trim() });
         if (existingUser) {
             return withCors({
                 status: 400,
@@ -66,8 +75,8 @@ async function register(request: HttpRequest, context: InvocationContext): Promi
 
         // Create user
         const user = new UserModel({
-            username,
-            email,
+            username: username.trim(),
+            email: email.toLowerCase().trim(),
             hashed_password,
             isActive: true
         });
@@ -78,8 +87,17 @@ async function register(request: HttpRequest, context: InvocationContext): Promi
             status: 201,
             jsonBody: { success: true, result: 'User registered successfully' }
         });
-    } catch (error) {
+    } catch (error: unknown) {
         context.error('Registration error:', error);
+
+        // Handle MongoDB duplicate key error
+        if (error && typeof error === 'object' && 'code' in error && error.code === 11000) {
+            return withCors({
+                status: 400,
+                jsonBody: { success: false, result: 'User with this email already exists' }
+            });
+        }
+
         return withCors(serverErrorResponse('Server error during registration'));
     }
 }
@@ -109,8 +127,8 @@ async function login(request: HttpRequest, context: InvocationContext): Promise<
             });
         }
 
-        // Find user
-        const user = await UserModel.findOne({ email });
+        // Find user (normalize email)
+        const user = await UserModel.findOne({ email: email.toLowerCase().trim() });
         if (!user) {
             return withCors({
                 status: 401,
